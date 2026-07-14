@@ -133,11 +133,18 @@ body{
 .cnote{ font-family:'Reenie',cursive; font-size:18px; color:var(--ink-soft); opacity:.92; margin-top:1px; }
 .loc{ display:block; font-family:'Reenie',cursive; font-size:17px; color:var(--ink-soft); opacity:.82; margin-top:3px; }
 .card.done .loc{ opacity:.4; }
-.maproute{ display:inline-block; margin-top:4px; font-family:'Reenie',cursive; font-size:17px;
+.clinks{ display:flex; flex-wrap:wrap; gap:2px 18px; margin-top:4px; align-items:baseline; }
+.maproute{ display:inline-block; font-family:'Reenie',cursive; font-size:17px;
   color:var(--terra); text-decoration:underline; text-decoration-color:rgba(187,113,84,.5);
   text-underline-offset:2px; transition:color .15s; }
 .maproute:hover{ color:var(--rust); text-decoration-color:var(--rust); }
 .maproute:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; border-radius:3px; }
+.reflink{ display:inline-block; font-family:'Reenie',cursive; font-size:17px;
+  color:var(--navy); text-decoration:underline; text-decoration-color:rgba(55,72,90,.4);
+  text-underline-offset:2px; transition:color .15s; }
+.reflink:hover{ color:var(--ink); text-decoration-color:var(--ink); }
+.reflink:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; border-radius:3px; }
+.card.done .clinks{ opacity:.5; }
 .tick{
   flex:0 0 auto; margin-top:4px; width:22px; height:22px; padding:0;
   border:2px solid var(--ink-soft); border-radius:5px 6px 4px 7px;
@@ -197,7 +204,7 @@ body{
   .cname{ font-size:23px; }
   .cnote{ font-size:17px; }
   .loc{ font-size:16px; }
-  .maproute{ font-size:16px; padding:2px 0; }
+  .maproute, .reflink{ font-size:16px; padding:2px 0; }
   .tick{ width:26px; height:26px; }
   .tick[aria-pressed="true"]::after{ font-size:32px; inset:-8px 0 0 2px; }
   .addrow{ flex-wrap:wrap; }
@@ -719,62 +726,62 @@ body{
 <script>
 const DATA = {
   windmills:{title:"Windmills",tag:"turning slowly against a wide, flat sky",places:[
-    {n:"Kinderdijk",s:"nineteen mills in a row · UNESCO",loc:"Nederwaard 1, Kinderdijk",q:"Kinderdijk Windmills"},
-    {n:"Zaanse Schans",s:"green wooden mills by the Zaan",loc:"Schansend 7, Zaandam",q:"Zaanse Schans"},
-    {n:"De Gooyer, Amsterdam",s:"the city's last tall mill",loc:"Funenkade 5, Amsterdam",q:"De Gooyer windmill, Amsterdam"},
-    {n:"Schiedam",s:"the tallest windmills in the world",loc:"Schiedam mill district",q:"Windmills of Schiedam"}]},
+    {n:"Kinderdijk",s:"nineteen mills in a row · UNESCO",loc:"Nederwaard 1, Kinderdijk",q:"Kinderdijk Windmills",r:"https://whc.unesco.org/en/list/818/",rl:"UNESCO"},
+    {n:"Zaanse Schans",s:"green wooden mills by the Zaan",loc:"Schansend 7, Zaandam",q:"Zaanse Schans",r:"https://en.wikipedia.org/wiki/Zaanse_Schans",rl:"Wikipedia"},
+    {n:"De Gooyer, Amsterdam",s:"the city's last tall mill",loc:"Funenkade 5, Amsterdam",q:"De Gooyer windmill, Amsterdam",r:"https://en.wikipedia.org/wiki/De_Gooyer",rl:"Wikipedia"},
+    {n:"Schiedam",s:"the tallest windmills in the world",loc:"Schiedam mill district",q:"Windmills of Schiedam",r:"https://en.wikipedia.org/wiki/Schiedam",rl:"Wikipedia"}]},
   amsterdam:{title:"Amsterdam",tag:"canals, low light on the water, small rooms full of paintings",places:[
-    {n:"Rijksmuseum",s:"Vermeer & the Dutch Golden Age",loc:"Museumstraat 1, Amsterdam",q:"Rijksmuseum, Amsterdam"},
-    {n:"The Grachtengordel",s:"the ring of canals · UNESCO",loc:"Amsterdam canal ring",q:"Grachtengordel, Amsterdam"},
-    {n:"Rembrandt House",s:"his studio, kept as it was",loc:"Jodenbreestraat 4, Amsterdam",q:"Museum Het Rembrandthuis, Amsterdam"},
-    {n:"Ons' Lieve Heer op Solder",s:"a church hidden in an attic",loc:"Oudezijds Voorburgwal 38, Amsterdam",q:"Ons' Lieve Heer op Solder, Amsterdam"}]},
+    {n:"Rijksmuseum",s:"Vermeer & the Dutch Golden Age",loc:"Museumstraat 1, Amsterdam",q:"Rijksmuseum, Amsterdam",r:"https://www.rijksmuseum.nl/en",rl:"official site"},
+    {n:"The Grachtengordel",s:"the ring of canals · UNESCO",loc:"Amsterdam canal ring",q:"Grachtengordel, Amsterdam",r:"https://en.wikipedia.org/wiki/Canals_of_Amsterdam",rl:"Wikipedia"},
+    {n:"Rembrandt House",s:"his studio, kept as it was",loc:"Jodenbreestraat 4, Amsterdam",q:"Museum Het Rembrandthuis, Amsterdam",r:"https://www.rembrandthuis.nl/en/",rl:"official site"},
+    {n:"Ons' Lieve Heer op Solder",s:"a church hidden in an attic",loc:"Oudezijds Voorburgwal 38, Amsterdam",q:"Ons' Lieve Heer op Solder, Amsterdam",r:"https://en.wikipedia.org/wiki/Ons%27_Lieve_Heer_op_Solder",rl:"Wikipedia"}]},
   leiden:{title:"Leiden",tag:"the city of first books and long, unhurried thoughts",places:[
-    {n:"Universiteit Leiden",s:"the oldest university in the country",loc:"Rapenburg 73, Leiden",q:"Academiegebouw Universiteit Leiden"},
-    {n:"Hortus Botanicus",s:"a botanical garden since 1590",loc:"Rapenburg 73, Leiden",q:"Hortus Botanicus Leiden"},
-    {n:"Rijksmuseum Boerhaave",s:"five centuries of science",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden"},
-    {n:"Rapenburg & the Pieterskerk",s:"quiet canal, older stones",loc:"Pieterskerkhof 1a, Leiden",q:"Pieterskerk, Leiden"}]},
+    {n:"Universiteit Leiden",s:"the oldest university in the country",loc:"Rapenburg 73, Leiden",q:"Academiegebouw Universiteit Leiden",r:"https://www.universiteitleiden.nl/en",rl:"official site"},
+    {n:"Hortus Botanicus",s:"a botanical garden since 1590",loc:"Rapenburg 73, Leiden",q:"Hortus Botanicus Leiden",r:"https://en.wikipedia.org/wiki/Hortus_Botanicus_Leiden",rl:"Wikipedia"},
+    {n:"Rijksmuseum Boerhaave",s:"five centuries of science",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden",r:"https://rijksmuseumboerhaave.nl/english/",rl:"official site"},
+    {n:"Rapenburg & the Pieterskerk",s:"quiet canal, older stones",loc:"Pieterskerkhof 1a, Leiden",q:"Pieterskerk, Leiden",r:"https://en.wikipedia.org/wiki/Pieterskerk,_Leiden",rl:"Wikipedia"}]},
   boerhaave:{title:"Boerhaave & the Sciences",tag:"how to look closely, and keep looking",places:[
-    {n:"Rijksmuseum Boerhaave, Leiden",s:"instruments, cabinets, curiosity",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden"},
-    {n:"The Anatomical Theatre",s:"where looking became learning",loc:"Rapenburg, Leiden",q:"Anatomisch Theater Leiden"},
-    {n:"Teylers Museum, Haarlem",s:"the oldest museum in the country",loc:"Spaarne 16, Haarlem",q:"Teylers Museum, Haarlem"},
-    {n:"Leeuwenhoek's Delft",s:"the first glimpse of the very small",loc:"Markt 80, Delft (Oude Kerk)",q:"Van Leeuwenhoek Oude Kerk Delft"}]},
+    {n:"Rijksmuseum Boerhaave, Leiden",s:"instruments, cabinets, curiosity",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden",r:"https://rijksmuseumboerhaave.nl/english/",rl:"official site"},
+    {n:"The Anatomical Theatre",s:"where looking became learning",loc:"Rapenburg, Leiden",q:"Anatomisch Theater Leiden",r:"https://en.wikipedia.org/wiki/Anatomical_theatre",rl:"Wikipedia"},
+    {n:"Teylers Museum, Haarlem",s:"the oldest museum in the country",loc:"Spaarne 16, Haarlem",q:"Teylers Museum, Haarlem",r:"https://www.teylersmuseum.nl/en",rl:"official site"},
+    {n:"Leeuwenhoek's Delft",s:"the first glimpse of the very small",loc:"Markt 80, Delft (Oude Kerk)",q:"Van Leeuwenhoek Oude Kerk Delft",r:"https://en.wikipedia.org/wiki/Antonie_van_Leeuwenhoek",rl:"Wikipedia"}]},
   observatory:{title:"Observatories",tag:"rooms built to hold the night still for a while",places:[
-    {n:"Old Observatory, Leiden",s:"the Sterrewacht of 1861",loc:"Sterrenwachtlaan 11, Leiden",q:"Old Observatory Leiden"},
-    {n:"Sonnenborgh, Utrecht",s:"a bastion turned to the stars",loc:"Zonnenburg 2, Utrecht",q:"Sonnenborgh museum sterrenwacht Utrecht"},
-    {n:"Radboud, Nijmegen",s:"darker nights to the east",loc:"Nijmegen",q:"Radboud Universiteit Nijmegen"}]},
+    {n:"Old Observatory, Leiden",s:"the Sterrewacht of 1861",loc:"Sterrenwachtlaan 11, Leiden",q:"Old Observatory Leiden",r:"https://en.wikipedia.org/wiki/Leiden_Observatory",rl:"Wikipedia"},
+    {n:"Sonnenborgh, Utrecht",s:"a bastion turned to the stars",loc:"Zonnenburg 2, Utrecht",q:"Sonnenborgh museum sterrenwacht Utrecht",r:"https://en.wikipedia.org/wiki/Sonnenborgh_Observatory",rl:"Wikipedia"},
+    {n:"Radboud, Nijmegen",s:"darker nights to the east",loc:"Nijmegen",q:"Radboud Universiteit Nijmegen",r:"https://www.ru.nl/en",rl:"official site"}]},
   lighthouse:{title:"Coast & Lighthouses",tag:"small lights kept for anyone still out on the water",places:[
-    {n:"Brandaris, Terschelling",s:"the oldest lighthouse in the land",loc:"Torenstraat, West-Terschelling",q:"Brandaris lighthouse Terschelling"},
-    {n:"The Wadden Sea",s:"tidal flats · UNESCO",loc:"Waddenzee coast",q:"Waddenzee"},
-    {n:"Westhoofd, Ouddorp",s:"tallest light on the coast",loc:"Westhoofd, Ouddorp",q:"Vuurtoren Westhoofd Ouddorp"},
-    {n:"'Lange Jaap', Den Helder",s:"the tallest cast-iron light",loc:"Kijkduin, Den Helder",q:"Lange Jaap lighthouse Den Helder"}]},
+    {n:"Brandaris, Terschelling",s:"the oldest lighthouse in the land",loc:"Torenstraat, West-Terschelling",q:"Brandaris lighthouse Terschelling",r:"https://en.wikipedia.org/wiki/Brandaris",rl:"Wikipedia"},
+    {n:"The Wadden Sea",s:"tidal flats · UNESCO",loc:"Waddenzee coast",q:"Waddenzee",r:"https://whc.unesco.org/en/list/1314/",rl:"UNESCO"},
+    {n:"Westhoofd, Ouddorp",s:"tallest light on the coast",loc:"Westhoofd, Ouddorp",q:"Vuurtoren Westhoofd Ouddorp",r:"https://nl.wikipedia.org/wiki/Vuurtoren_Westhoofd",rl:"Wikipedia (NL)"},
+    {n:"'Lange Jaap', Den Helder",s:"the tallest cast-iron light",loc:"Kijkduin, Den Helder",q:"Lange Jaap lighthouse Den Helder",r:"https://en.wikipedia.org/wiki/Lange_Jaap",rl:"Wikipedia"}]},
   monument:{title:"Monuments & UNESCO",tag:"the marks a country leaves to remember itself by",places:[
-    {n:"Spinoza Monument",s:"Nicolas Dings, 2008 — 'the purpose of the state is freedom'",loc:"Zwanenburgwal 15, 1011 VW Amsterdam · by the Stopera",q:"Spinoza Monument, Zwanenburgwal, Amsterdam"},
-    {n:"Nationaal Monument, Dam Square",s:"Amsterdam's place of remembering",loc:"Dam, Amsterdam",q:"Nationaal Monument Dam, Amsterdam"},
-    {n:"The Beemster Polder",s:"land drawn from water · UNESCO",loc:"De Beemster, North Holland",q:"Beemster Polder"},
-    {n:"Van Nelle Factory, Rotterdam",s:"daylight & modern lines · UNESCO",loc:"Van Nelleweg 1, Rotterdam",q:"Van Nelle Fabriek, Rotterdam"},
-    {n:"The Afsluitdijk",s:"holding back the sea",loc:"Afsluitdijk, Friesland–North Holland",q:"Afsluitdijk"}]},
+    {n:"Spinoza Monument",s:"Nicolas Dings, 2008 — 'the purpose of the state is freedom'",loc:"Zwanenburgwal 15, 1011 VW Amsterdam · by the Stopera",q:"Spinoza Monument, Zwanenburgwal, Amsterdam",r:"https://nl.wikipedia.org/wiki/Spinozamonument",rl:"Wikipedia (NL)"},
+    {n:"Nationaal Monument, Dam Square",s:"Amsterdam's place of remembering",loc:"Dam, Amsterdam",q:"Nationaal Monument Dam, Amsterdam",r:"https://en.wikipedia.org/wiki/National_Monument_(Amsterdam)",rl:"Wikipedia"},
+    {n:"The Beemster Polder",s:"land drawn from water · UNESCO",loc:"De Beemster, North Holland",q:"Beemster Polder",r:"https://whc.unesco.org/en/list/899/",rl:"UNESCO"},
+    {n:"Van Nelle Factory, Rotterdam",s:"daylight & modern lines · UNESCO",loc:"Van Nelleweg 1, Rotterdam",q:"Van Nelle Fabriek, Rotterdam",r:"https://whc.unesco.org/en/list/1441/",rl:"UNESCO"},
+    {n:"The Afsluitdijk",s:"holding back the sea",loc:"Afsluitdijk, Friesland–North Holland",q:"Afsluitdijk",r:"https://en.wikipedia.org/wiki/Afsluitdijk",rl:"Wikipedia"}]},
   huygens:{title:"Huygens",tag:"the measure of time, and the rings around Saturn",places:[
-    {n:"Huygens' Hofwijck, Voorburg",s:"his garden house on the Vliet",loc:"Westeinde 2A, Voorburg",q:"Museum Huygens Hofwijck, Voorburg"},
-    {n:"His pendulum clock",s:"at Rijksmuseum Boerhaave, Leiden",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden"},
-    {n:"The Hague",s:"where he was born and thought",loc:"Den Haag",q:"The Hague, Netherlands"}]},
+    {n:"Huygens' Hofwijck, Voorburg",s:"his garden house on the Vliet",loc:"Westeinde 2A, Voorburg",q:"Museum Huygens Hofwijck, Voorburg",r:"https://en.wikipedia.org/wiki/Hofwijck",rl:"Wikipedia"},
+    {n:"His pendulum clock",s:"at Rijksmuseum Boerhaave, Leiden",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden",r:"https://en.wikipedia.org/wiki/Pendulum_clock",rl:"Wikipedia"},
+    {n:"The Hague",s:"where he was born and thought",loc:"Den Haag",q:"The Hague, Netherlands",r:"https://en.wikipedia.org/wiki/Christiaan_Huygens",rl:"Wikipedia"}]},
   spinoza:{title:"Spinoza",tag:"grind the lens patiently, and see the whole",places:[
-    {n:"Spinozahuis, Rijnsburg",s:"where he ground lenses & wrote",loc:"Spinozalaan 29, Rijnsburg",q:"Spinozahuis, Rijnsburg"},
-    {n:"Paviljoensgracht, The Hague",s:"his last rooms",loc:"Paviljoensgracht 72-74, Den Haag",q:"Domus Spinozana Paviljoensgracht Den Haag"},
-    {n:"Nieuwe Kerk, The Hague",s:"his quiet memorial",loc:"Spui 175, Den Haag",q:"Nieuwe Kerk Den Haag"}]},
+    {n:"Spinozahuis, Rijnsburg",s:"where he ground lenses & wrote",loc:"Spinozalaan 29, Rijnsburg",q:"Spinozahuis, Rijnsburg",r:"https://nl.wikipedia.org/wiki/Spinozahuis",rl:"Wikipedia (NL)"},
+    {n:"Paviljoensgracht, The Hague",s:"his last rooms",loc:"Paviljoensgracht 72-74, Den Haag",q:"Domus Spinozana Paviljoensgracht Den Haag",r:"https://en.wikipedia.org/wiki/Baruch_Spinoza",rl:"Wikipedia"},
+    {n:"Nieuwe Kerk, The Hague",s:"his quiet memorial",loc:"Spui 175, Den Haag",q:"Nieuwe Kerk Den Haag",r:"https://en.wikipedia.org/wiki/Nieuwe_Kerk_(The_Hague)",rl:"Wikipedia"}]},
   delft:{title:"Delft",tag:"blue tiles, still canals, Vermeer's patient rooms",places:[
-    {n:"Vermeer Centrum",s:"the light he is remembered for",loc:"Voldersgracht 21, Delft",q:"Vermeer Centrum Delft"},
-    {n:"Oude & Nieuwe Kerk",s:"leaning tower, royal tombs",loc:"Markt 80, Delft",q:"Nieuwe Kerk Delft"},
-    {n:"Royal Delft",s:"the last delftware pottery",loc:"Rotterdamseweg 196, Delft",q:"Royal Delft De Porceleyne Fles"},
-    {n:"Museum Prinsenhof",s:"where the country's story turned",loc:"Sint Agathaplein 1, Delft",q:"Museum Prinsenhof Delft"}]},
+    {n:"Vermeer Centrum",s:"the light he is remembered for",loc:"Voldersgracht 21, Delft",q:"Vermeer Centrum Delft",r:"https://www.vermeerdelft.nl/en/",rl:"official site"},
+    {n:"Oude & Nieuwe Kerk",s:"leaning tower, royal tombs",loc:"Markt 80, Delft",q:"Nieuwe Kerk Delft",r:"https://en.wikipedia.org/wiki/Nieuwe_Kerk_(Delft)",rl:"Wikipedia"},
+    {n:"Royal Delft",s:"the last delftware pottery",loc:"Rotterdamseweg 196, Delft",q:"Royal Delft De Porceleyne Fles",r:"https://royaldelft.com/",rl:"official site"},
+    {n:"Museum Prinsenhof",s:"where the country's story turned",loc:"Sint Agathaplein 1, Delft",q:"Museum Prinsenhof Delft",r:"https://nl.wikipedia.org/wiki/Prinsenhof_(Delft)",rl:"Wikipedia (NL)"}]},
   descartes:{title:"Descartes",tag:"a candle, a clear thought — I think, therefore I am",places:[
-    {n:"His Amsterdam lodgings",s:"years of quiet writing",loc:"Westermarkt 6, Amsterdam",q:"Westermarkt, Amsterdam"},
-    {n:"Endegeest, Oegstgeest",s:"the castle where he stayed",loc:"Endegeesterstraatweg 5, Oegstgeest",q:"Kasteel Endegeest, Oegstgeest"},
-    {n:"Franeker",s:"the town of his studies",loc:"Franeker, Friesland",q:"Franeker"}]},
+    {n:"His Amsterdam lodgings",s:"years of quiet writing",loc:"Westermarkt 6, Amsterdam",q:"Westermarkt, Amsterdam",r:"https://en.wikipedia.org/wiki/Ren%C3%A9_Descartes",rl:"Wikipedia"},
+    {n:"Endegeest, Oegstgeest",s:"the castle where he stayed",loc:"Endegeesterstraatweg 5, Oegstgeest",q:"Kasteel Endegeest, Oegstgeest",r:"https://nl.wikipedia.org/wiki/Kasteel_Endegeest",rl:"Wikipedia (NL)"},
+    {n:"Franeker",s:"the town of his studies",loc:"Franeker, Friesland",q:"Franeker",r:"https://en.wikipedia.org/wiki/Franeker",rl:"Wikipedia"}]},
   hogeveluwe:{title:"Hoge Veluwe",tag:"a reserve of silence — heath, pine, and white bicycles",places:[
-    {n:"Kröller-Müller Museum",s:"Van Goghs among the trees",loc:"Houtkampweg 6, Otterlo",q:"Kröller-Müller Museum"},
-    {n:"Jachthuis Sint Hubertus",s:"a hunting lodge on the water",loc:"De Hoge Veluwe, Otterlo",q:"Jachthuis Sint Hubertus"},
-    {n:"The white bicycles",s:"free to ride through the park",loc:"Nationaal Park De Hoge Veluwe",q:"Nationaal Park De Hoge Veluwe"},
-    {n:"Heath & drifting sand",s:"go at dusk for the deer",loc:"De Hoge Veluwe, Hoenderloo",q:"Nationaal Park De Hoge Veluwe Hoenderloo"}]},
+    {n:"Kröller-Müller Museum",s:"Van Goghs among the trees",loc:"Houtkampweg 6, Otterlo",q:"Kröller-Müller Museum",r:"https://krollermuller.nl/en",rl:"official site"},
+    {n:"Jachthuis Sint Hubertus",s:"a hunting lodge on the water",loc:"De Hoge Veluwe, Otterlo",q:"Jachthuis Sint Hubertus",r:"https://nl.wikipedia.org/wiki/Jachthuis_Sint-Hubertus",rl:"Wikipedia (NL)"},
+    {n:"The white bicycles",s:"free to ride through the park",loc:"Nationaal Park De Hoge Veluwe",q:"Nationaal Park De Hoge Veluwe",r:"https://www.hogeveluwe.nl/en",rl:"official site"},
+    {n:"Heath & drifting sand",s:"go at dusk for the deer",loc:"De Hoge Veluwe, Hoenderloo",q:"Nationaal Park De Hoge Veluwe Hoenderloo",r:"https://www.hogeveluwe.nl/en",rl:"official site"}]},
   door:{title:"A place not yet found",tag:"leave this page open — for the discovery still ahead of you",places:[
     {n:"A village with no name yet",s:"the one you'll stumble into"},
     {n:"A library you'll sit in for hours",s:"somewhere you haven't been"},
@@ -809,7 +816,10 @@ function makeCard(p){
   let html = '<div class="cname">'+esc(p.n)+'</div>';
   if(p.s)   html += '<div class="cnote">'+esc(p.s)+'</div>';
   if(p.loc) html += '<span class="loc">'+esc(p.loc)+'</span>';
-  if(p.q)   html += '<a class="maproute" href="'+routeHref(p.q)+'" target="_blank" rel="noopener">Route from Utrecht Centraal ↗</a>';
+  const links = [];
+  if(p.q) links.push('<a class="maproute" href="'+routeHref(p.q)+'" target="_blank" rel="noopener">Route from Utrecht Centraal ↗</a>');
+  if(p.r) links.push('<a class="reflink" href="'+esc(p.r)+'" target="_blank" rel="noopener">'+esc(p.rl||'read more')+' ↗</a>');
+  if(links.length) html += '<div class="clinks">'+links.join('')+'</div>';
   body.innerHTML = html;
   card.append(btn, body);
   return card;
@@ -821,7 +831,8 @@ function buildList(key){
 function addPlace(){
   const v = addInput.value.trim();
   if(!v) return;
-  const card = makeCard({ n:v, s:"a place you want to visit", q:v+', Netherlands', user:true });
+  const card = makeCard({ n:v, s:"a place you want to visit", q:v+', Netherlands',
+    r:'https://en.wikipedia.org/w/index.php?search='+encodeURIComponent(v), rl:'look it up', user:true });
   elList.append(card);
   addInput.value=''; addInput.focus();
   card.scrollIntoView({block:'nearest', behavior:'smooth'});
