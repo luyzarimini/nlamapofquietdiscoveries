@@ -1,0 +1,854 @@
+<title>The Netherlands — A Map of Quiet Discoveries</title>
+<style>
+@font-face{
+  font-family:'Caveat';font-style:normal;font-weight:400 700;font-display:swap;
+  src:url(data:font/woff2;base64,__CAVEAT__) format('woff2');
+}
+@font-face{
+  font-family:'Reenie';font-style:normal;font-weight:400;font-display:swap;
+  src:url(data:font/woff2;base64,__REENIE__) format('woff2');
+}
+
+:root{
+  --paper:#e7ddc2; --paper-hi:#efe7ce; --paper-lo:#d9cca8;
+  --ink:#3c372c; --ink-soft:#6a604c;
+  --ochre:#bd9647; --dust:#7c96a6; --teal:#5f847d;
+  --terra:#bb7154; --navy:#37485a; --olive:#7a7b4b; --rust:#a85536;
+  --desk:#cfc09c; --desk-2:#c3b18a; --edge-shadow:rgba(60,45,25,.34);
+  --vignette:rgba(70,52,28,.16);
+}
+/* a warm paper world in every theme — no dark desk */
+:root[data-theme="light"]{ --desk:#cfc09c; --desk-2:#c3b18a; --edge-shadow:rgba(60,45,25,.34); --vignette:rgba(70,52,28,.16);}
+:root[data-theme="dark"]{ --desk:#cfc09c; --desk-2:#c3b18a; --edge-shadow:rgba(60,45,25,.34); --vignette:rgba(70,52,28,.16);}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;
+  background:var(--desk);
+  display:block; margin:0; padding:0; overflow-x:hidden;
+  font-family:'Caveat',cursive; -webkit-font-smoothing:antialiased;
+}
+/* paper fills the whole page, edge to edge */
+.stage{ width:100%; max-width:none; }
+.page{
+  width:100%; height:auto; display:block;
+  filter:drop-shadow(0 6px 16px rgba(46,32,14,.26));
+}
+.credit{
+  margin:10px auto 14px; text-align:center;
+  font-family:'Reenie',cursive; color:var(--ink-soft); opacity:.55;
+  font-size:17px; letter-spacing:.4px;
+}
+
+/* clickable discoveries */
+.spot{ cursor:pointer; transform-box:fill-box; transform-origin:center;
+       transition:transform .18s ease; outline:none; }
+.spot .hit{ fill:transparent; pointer-events:all; }
+/* only the discoveries are clickable — decorative overlays (paper grain, vignette,
+   frame, stains) must never sit in front of them and swallow the click */
+.page > *{ pointer-events:none; }
+.page > .spot{ pointer-events:auto; }
+.spot .label{ transition:fill .18s ease; }
+.spot:hover, .spot:focus-visible{ transform:scale(1.07); }
+.spot:hover .label, .spot:focus-visible .label{ fill:var(--terra); }
+.spot .halo{ opacity:0; transition:opacity .2s ease;
+  stroke-dasharray:1.5 9; stroke-linecap:round; stroke-width:2.6;
+  transform-box:fill-box; transform-origin:center; }
+.spot:hover .halo, .spot:focus-visible .halo{ opacity:.8; animation:spin 16s linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce){ .spot:hover .halo, .spot:focus-visible .halo{ animation:none; } }
+
+/* gentle, quiet motion only */
+@keyframes drift{ 0%{transform:translate(0,0)} 50%{transform:translate(10px,-7px)} 100%{transform:translate(0,0)} }
+@keyframes drift2{ 0%{transform:translate(0,0)} 50%{transform:translate(-9px,6px)} 100%{transform:translate(0,0)} }
+@keyframes glow{ 0%,100%{opacity:.5} 50%{opacity:.88} }
+.fly-a{animation:drift 15s ease-in-out infinite}
+.fly-b{animation:drift2 19s ease-in-out infinite}
+.doorglow{animation:glow 7s ease-in-out infinite; transform-origin:center}
+@media (prefers-reduced-motion:reduce){ .fly-a,.fly-b,.doorglow{animation:none} }
+
+/* ---------- the page behind each icon: a second papyrus sheet ---------- */
+.backdrop{
+  position:fixed; inset:0; z-index:50; display:none;
+  align-items:flex-start; justify-content:center; overflow:auto;
+  padding:clamp(16px,4vh,52px) 18px;
+  background:radial-gradient(120% 120% at 50% 0%, rgba(30,22,10,.44), rgba(20,15,6,.66));
+  backdrop-filter:blur(2px);
+}
+.backdrop.show{ display:flex; }
+.sheet{
+  position:relative; width:min(600px,95vw); margin:auto;
+  background-color:var(--paper-hi);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  background-size:150px 150px;
+  border-radius:10px 16px 9px 14px;
+  padding:36px 38px 30px;
+  box-shadow:0 26px 55px rgba(20,12,4,.55);
+  color:var(--ink); font-family:'Caveat',cursive;
+  animation:rise .3s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes rise{ from{opacity:0; transform:translateY(16px) scale(.985)} to{opacity:1; transform:none} }
+@media (prefers-reduced-motion:reduce){ .sheet{ animation:none } }
+/* ragged hand-drawn deckle edge (border only — content stays crisp) */
+.sheet::before{
+  content:""; position:absolute; inset:3px; border:1.6px solid rgba(90,74,50,.55);
+  border-radius:9px 15px 8px 13px; filter:url(#tornSheet); pointer-events:none;
+}
+/* stitched inner border */
+.sheet::after{
+  content:""; position:absolute; inset:13px; border:1.4px dashed rgba(108,96,76,.38);
+  border-radius:7px; pointer-events:none;
+}
+.sheet .close{
+  position:absolute; top:12px; right:14px; z-index:3;
+  width:36px; height:36px; border:none; background:transparent;
+  font-family:'Caveat',cursive; font-size:32px; line-height:1; color:var(--ink-soft);
+  cursor:pointer; border-radius:50%; transition:background .15s, color .15s;
+}
+.sheet .close:hover{ background:rgba(120,100,70,.14); color:var(--ink); }
+.sheet .close:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; }
+.sheet > *{ position:relative; z-index:2; }
+.sheet-eyebrow{ font-family:'Reenie',cursive; font-size:20px; color:var(--ink-soft); letter-spacing:.5px; }
+.sheet-title{ margin:2px 0 4px; font-size:52px; font-weight:700; line-height:.98; text-wrap:balance; }
+.sheet-tag{ margin:0 0 16px; font-family:'Reenie',cursive; font-size:22px; color:var(--ink-soft); }
+.sheet-heading{ font-family:'Reenie',cursive; font-size:20px; color:var(--terra);
+  letter-spacing:1px; text-transform:uppercase; margin:6px 0 12px; }
+
+/* place cards */
+.cardwall{ display:flex; flex-direction:column; gap:12px; }
+.card{
+  position:relative; display:flex; align-items:flex-start; gap:13px;
+  background:var(--paper); border-radius:7px 10px 6px 9px;
+  padding:12px 15px 13px; box-shadow:0 2px 7px rgba(40,28,12,.16);
+}
+.card::after{ content:""; position:absolute; inset:0; border-radius:inherit;
+  box-shadow:inset 0 0 0 1.4px rgba(120,100,70,.16); pointer-events:none; }
+.card.card-user{ background:var(--paper-hi); box-shadow:0 2px 8px rgba(40,28,12,.2); }
+.card.card-user::before{ content:""; position:absolute; left:0; top:9px; bottom:9px; width:4px;
+  border-radius:3px; background:var(--ochre); opacity:.7; }
+.card .body{ flex:1 1 auto; min-width:0; }
+.cname{ font-size:26px; font-weight:700; line-height:1.1; }
+.card.done .cname{ text-decoration:line-through; text-decoration-color:rgba(108,96,76,.55); opacity:.5; }
+.cnote{ font-family:'Reenie',cursive; font-size:18px; color:var(--ink-soft); opacity:.92; margin-top:1px; }
+.loc{ display:block; font-family:'Reenie',cursive; font-size:17px; color:var(--ink-soft); opacity:.82; margin-top:3px; }
+.card.done .loc{ opacity:.4; }
+.maproute{ display:inline-block; margin-top:4px; font-family:'Reenie',cursive; font-size:17px;
+  color:var(--terra); text-decoration:underline; text-decoration-color:rgba(187,113,84,.5);
+  text-underline-offset:2px; transition:color .15s; }
+.maproute:hover{ color:var(--rust); text-decoration-color:var(--rust); }
+.maproute:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; border-radius:3px; }
+.tick{
+  flex:0 0 auto; margin-top:4px; width:22px; height:22px; padding:0;
+  border:2px solid var(--ink-soft); border-radius:5px 6px 4px 7px;
+  background:transparent; cursor:pointer; position:relative; transition:border-color .15s;
+}
+.tick:hover{ border-color:var(--terra); }
+.tick:focus-visible{ outline:2px solid var(--terra); outline-offset:2px; }
+.tick[aria-pressed="true"]::after{
+  content:"✓"; position:absolute; inset:-7px 0 0 1px; font-family:'Caveat',cursive;
+  font-size:28px; color:var(--terra); font-weight:700;
+}
+/* add-a-place row */
+.addrow{ display:flex; gap:10px; margin-top:16px; align-items:stretch; }
+.addinput{
+  flex:1 1 auto; min-width:0; font-family:'Caveat',cursive; font-size:23px; color:var(--ink);
+  background:transparent; border:none; border-bottom:1.6px dashed rgba(189,150,71,.6);
+  padding:6px 4px; outline:none;
+}
+.addinput::placeholder{ color:var(--ink-soft); opacity:.5; }
+.addinput:focus{ border-bottom-color:var(--terra); }
+.addbtn{
+  flex:0 0 auto; font-family:'Caveat',cursive; font-size:22px; font-weight:700; color:var(--paper-hi);
+  background:var(--terra); border:none; border-radius:6px 8px 5px 7px; padding:6px 16px;
+  cursor:pointer; transition:background .15s, transform .1s;
+}
+.addbtn:hover{ background:var(--rust); }
+.addbtn:active{ transform:translateY(1px); }
+.addbtn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+.sheet-foot{ margin-top:14px; font-family:'Reenie',cursive; font-size:17px; color:var(--ink-soft); opacity:.7; }
+
+/* ---------- mobile ---------- */
+/* touch devices have no hover: show every ring faintly so the drawings read as tappable */
+@media (hover:none){
+  .spot .halo{ opacity:.28; animation:none; }
+  .spot:active .halo{ opacity:.85; }
+  .spot:active{ transform:scale(1.05); }
+}
+/* narrow screens: let the journal page be slightly wider than the phone and pan inside
+   its own container, so the tiny drawings stay legible and tappable */
+@media (max-width:560px){
+  body{ -webkit-tap-highlight-color:transparent; }
+  .stage{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .page{ min-width:560px; }
+  .credit{ font-size:14px; padding:0 12px; }
+}
+/* the papyrus card page on a phone */
+@media (max-width:520px){
+  .backdrop{ padding:10px 8px; }
+  .sheet{ width:100%; padding:26px 18px 22px; }
+  .sheet::after{ inset:9px; }
+  .sheet .close{ top:8px; right:8px; width:44px; height:44px; font-size:36px; }
+  .sheet-eyebrow{ font-size:18px; }
+  .sheet-title{ font-size:38px; }
+  .sheet-tag{ font-size:19px; margin-bottom:12px; }
+  .sheet-heading{ font-size:18px; }
+  .card{ padding:11px 12px; gap:11px; }
+  .cname{ font-size:23px; }
+  .cnote{ font-size:17px; }
+  .loc{ font-size:16px; }
+  .maproute{ font-size:16px; padding:2px 0; }
+  .tick{ width:26px; height:26px; }
+  .tick[aria-pressed="true"]::after{ font-size:32px; inset:-8px 0 0 2px; }
+  .addrow{ flex-wrap:wrap; }
+  .addinput{ font-size:21px; flex-basis:100%; }
+  .addbtn{ padding:8px 16px; margin-left:auto; }
+  .sheet-foot{ font-size:15px; }
+}
+</style>
+
+<div class="stage">
+<svg class="page" viewBox="0 0 1000 1440" role="img"
+     aria-label="An illustrated watercolour journal page titled The Netherlands, a map of quiet discoveries. Many small hand-drawn scenes are connected by wandering dotted paths; each scene can be opened to list places to visit. A small open door with a ladder sits near the lower centre.">
+<defs>
+  <filter id="torn" x="-6%" y="-4%" width="112%" height="108%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.011 0.014" numOctaves="3" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="17" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="rough" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="3" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="rough2" x="-25%" y="-25%" width="150%" height="150%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="tornSheet" x="-8%" y="-8%" width="116%" height="116%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.013 0.017" numOctaves="2" seed="9" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3.2"/></filter>
+  <filter id="softer" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9"/></filter>
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5" result="g"/>
+    <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0"/>
+  </filter>
+
+  <radialGradient id="wTerra" cx="50%" cy="45%" r="60%">
+    <stop offset="0%" stop-color="var(--terra)" stop-opacity=".60"/><stop offset="70%" stop-color="var(--terra)" stop-opacity=".22"/><stop offset="100%" stop-color="var(--terra)" stop-opacity="0"/></radialGradient>
+  <radialGradient id="wBlue" cx="50%" cy="45%" r="60%">
+    <stop offset="0%" stop-color="var(--dust)" stop-opacity=".55"/><stop offset="70%" stop-color="var(--dust)" stop-opacity=".20"/><stop offset="100%" stop-color="var(--dust)" stop-opacity="0"/></radialGradient>
+  <radialGradient id="wTeal" cx="50%" cy="45%" r="60%">
+    <stop offset="0%" stop-color="var(--teal)" stop-opacity=".52"/><stop offset="70%" stop-color="var(--teal)" stop-opacity=".18"/><stop offset="100%" stop-color="var(--teal)" stop-opacity="0"/></radialGradient>
+  <radialGradient id="wOchre" cx="50%" cy="45%" r="60%">
+    <stop offset="0%" stop-color="var(--ochre)" stop-opacity=".50"/><stop offset="70%" stop-color="var(--ochre)" stop-opacity=".18"/><stop offset="100%" stop-color="var(--ochre)" stop-opacity="0"/></radialGradient>
+  <radialGradient id="wOlive" cx="50%" cy="45%" r="60%">
+    <stop offset="0%" stop-color="var(--olive)" stop-opacity=".46"/><stop offset="70%" stop-color="var(--olive)" stop-opacity=".16"/><stop offset="100%" stop-color="var(--olive)" stop-opacity="0"/></radialGradient>
+  <radialGradient id="doorGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#f2e6bf" stop-opacity=".95"/><stop offset="55%" stop-color="var(--ochre)" stop-opacity=".45"/><stop offset="100%" stop-color="var(--ochre)" stop-opacity="0"/></radialGradient>
+  <linearGradient id="doorSky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#324a5e"/><stop offset="60%" stop-color="#4a6270"/><stop offset="100%" stop-color="#c99b6a"/></linearGradient>
+
+  <g id="swallow"><path d="M-11 0 Q-4 -6 0 0 Q4 -6 11 0 Q4 -2 0 1 Q-4 -2 -11 0 Z" fill="var(--ink)"/></g>
+  <g id="star4"><path d="M0 -7 Q1 -1 7 0 Q1 1 0 7 Q-1 1 -7 0 Q-1 -1 0 -7 Z" fill="var(--ochre)"/></g>
+  <g id="starink"><path d="M0 -7 L1.4 -1.4 L7 0 L1.4 1.4 L0 7 L-1.4 1.4 L-7 0 L-1.4 -1.4 Z" fill="none" stroke="var(--ink)" stroke-width="1.4"/></g>
+  <g id="pine">
+    <path d="M0 -22 L9 -4 L4 -4 L11 12 L-11 12 L-4 -4 L-9 -4 Z" fill="url(#wOlive)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M-2.5 12 L-2.5 20 L2.5 20 L2.5 12" fill="var(--olive)" stroke="var(--ink)" stroke-width="2"/></g>
+  <g id="hole"><circle r="9" fill="var(--desk)"/><circle r="9" fill="none" stroke="rgba(60,45,25,.35)" stroke-width="2"/></g>
+</defs>
+
+<!-- ===================== PAPER (enlarged to fill the sheet) ===================== -->
+<g filter="url(#torn)">
+  <rect x="14" y="14" width="972" height="1412" rx="10" fill="var(--paper)"/>
+  <rect x="14" y="14" width="972" height="1412" rx="10" fill="var(--paper-hi)" opacity=".45"/>
+</g>
+<g filter="url(#softer)" opacity=".5">
+  <ellipse cx="250" cy="170" rx="150" ry="120" fill="var(--paper-lo)"/>
+  <ellipse cx="780" cy="760" rx="180" ry="150" fill="var(--paper-lo)"/>
+  <ellipse cx="470" cy="1180" rx="200" ry="140" fill="var(--paper-hi)"/>
+  <ellipse cx="120" cy="980" rx="120" ry="150" fill="var(--paper-lo)"/>
+</g>
+
+<!-- ===================== WATERCOLOUR STAINS ===================== -->
+<g filter="url(#soft)">
+  <ellipse cx="150" cy="330" rx="120" ry="80" fill="url(#wOlive)"/>
+  <ellipse cx="470" cy="600" rx="230" ry="150" fill="url(#wBlue)" opacity=".7"/>
+  <ellipse cx="520" cy="1010" rx="210" ry="170" fill="url(#wBlue)" opacity=".6"/>
+  <ellipse cx="820" cy="330" rx="120" ry="95" fill="url(#wTeal)"/>
+  <ellipse cx="770" cy="1180" rx="150" ry="110" fill="url(#wOlive)"/>
+  <ellipse cx="880" cy="560" rx="90" ry="120" fill="url(#wBlue)"/>
+  <ellipse cx="470" cy="950" rx="120" ry="120" fill="url(#wOchre)" opacity=".8"/>
+  <ellipse cx="300" cy="1080" rx="90" ry="70" fill="url(#wTerra)" opacity=".7"/>
+  <ellipse cx="620" cy="470" rx="95" ry="80" fill="url(#wTeal)" opacity=".55"/>
+</g>
+<g filter="url(#soft)" opacity=".55">
+  <circle cx="905" cy="120" r="30" fill="url(#wTerra)"/>
+  <circle cx="70" cy="640" r="26" fill="url(#wOchre)"/>
+  <circle cx="640" cy="1330" r="34" fill="url(#wTeal)"/>
+  <circle cx="215" cy="1290" r="22" fill="url(#wTerra)"/>
+</g>
+
+<!-- ===================== RIVERS ===================== -->
+<g filter="url(#rough)">
+  <path d="M470 210 C 520 320, 400 420, 470 540 C 540 660, 420 760, 470 900 C 510 1010, 470 1120, 520 1320"
+        fill="none" stroke="var(--dust)" stroke-width="16" stroke-linecap="round" opacity=".5"/>
+  <path d="M470 210 C 520 320, 400 420, 470 540 C 540 660, 420 760, 470 900 C 510 1010, 470 1120, 520 1320"
+        fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" opacity=".55" stroke-dasharray="2 10"/>
+  <path d="M470 540 C 600 560, 700 600, 815 540" fill="none" stroke="var(--dust)" stroke-width="10" stroke-linecap="round" opacity=".4"/>
+</g>
+
+<!-- ===================== WANDERING DOTTED PATHS ===================== -->
+<g fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"
+   stroke-dasharray="0.5 9" opacity=".55" filter="url(#rough)">
+  <path d="M180 250 C 300 210, 360 300, 470 280 C 560 265, 640 300, 720 300"/>
+  <path d="M150 560 C 220 640, 320 640, 360 700 C 420 780, 380 860, 470 900"/>
+  <path d="M470 900 C 560 940, 700 900, 830 900"/>
+  <path d="M470 960 C 400 1010, 300 1010, 210 1060"/>
+  <path d="M520 1010 C 620 1030, 700 1120, 700 1180"/>
+  <path d="M300 1180 C 380 1230, 440 1280, 520 1300"/>
+  <path d="M720 300 C 800 360, 840 430, 852 470"/>
+  <path d="M852 490 C 866 520, 876 545, 882 560"/>
+  <path d="M700 320 C 662 380, 640 420, 620 448"/>
+  <path d="M620 496 C 560 620, 500 780, 478 878"/>
+  <path d="M330 660 C 300 720, 360 760, 470 900" opacity=".8"/>
+</g>
+
+<!-- small arrows -->
+<g stroke="var(--ink-soft)" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7" filter="url(#rough)">
+  <path d="M405 285 l14 -3 m-14 3 l11 6"/>
+  <path d="M455 895 l-13 5 m13 -5 l-6 -12"/>
+</g>
+
+<!-- ===================== ISLANDS / HILLS ===================== -->
+<g filter="url(#soft)" opacity=".8">
+  <path d="M70 372 Q150 330 250 366 Q300 384 250 402 Q150 430 90 404 Q52 392 70 372 Z" fill="var(--olive)" opacity=".38"/>
+  <path d="M630 344 Q740 316 830 350 Q866 366 820 384 Q720 408 650 388 Q604 372 630 344 Z" fill="var(--terra)" opacity=".30"/>
+  <path d="M90 1044 Q190 1016 280 1050 Q316 1066 268 1084 Q170 1108 110 1086 Q70 1072 90 1044 Z" fill="var(--dust)" opacity=".32"/>
+  <path d="M620 1206 Q740 1176 840 1216 Q876 1232 824 1250 Q710 1276 648 1252 Q604 1236 620 1206 Z" fill="var(--olive)" opacity=".34"/>
+</g>
+
+<!-- ============================ AMBIENT DECOR (not clickable) ============================ -->
+<!-- oak tree -->
+<g transform="translate(325 300)" filter="url(#rough)">
+  <path d="M-2 40 L-2 8 M2 40 L2 6 M-2 22 L-12 14 M2 20 L12 12" stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M0 -30 Q30 -28 30 -2 Q42 6 26 18 Q30 34 4 28 Q-14 40 -26 20 Q-44 12 -30 -4 Q-34 -30 0 -30 Z" fill="url(#wOlive)" stroke="var(--ink)" stroke-width="2.4"/>
+</g>
+<!-- apple tree (Boerhaave's garden) -->
+<g transform="translate(430 600)" filter="url(#rough)">
+  <path d="M0 34 L0 6 M0 18 L-9 12 M0 22 L9 16" stroke="var(--ink)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M0 -24 Q26 -22 24 2 Q24 22 0 24 Q-24 22 -24 2 Q-26 -22 0 -24 Z" fill="url(#wOlive)" stroke="var(--ink)" stroke-width="2.2"/>
+  <circle cx="-10" cy="-6" r="3" fill="var(--rust)" fill-opacity=".8"/><circle cx="8" cy="-10" r="3" fill="var(--rust)" fill-opacity=".8"/>
+  <circle cx="6" cy="8" r="3" fill="var(--rust)" fill-opacity=".8"/><circle cx="-8" cy="10" r="3" fill="var(--rust)" fill-opacity=".8"/>
+</g>
+<!-- castle silhouette (faded) -->
+<g transform="translate(430 300)" opacity=".38" filter="url(#rough2)">
+  <path d="M-30 30 L-30 8 L-24 8 L-24 14 L-18 14 L-18 6 L-12 6 L-12 14 L-6 14 L-6 8 L6 8 L6 14 L12 14 L12 6 L18 6 L18 14 L24 14 L24 8 L30 8 L30 30 Z" fill="var(--navy)" fill-opacity=".4" stroke="var(--ink)" stroke-width="1.6"/>
+  <path d="M0 6 L0 -8 L2 -12 L4 -8 L4 6" fill="var(--navy)" fill-opacity=".4" stroke="var(--ink)" stroke-width="1.4"/>
+</g>
+<!-- bicycle -->
+<g transform="translate(240 470)" filter="url(#rough)">
+  <circle cx="-14" cy="8" r="12" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+  <circle cx="16" cy="8" r="12" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+  <path d="M-14 8 L0 8 L8 -8 L-6 -8 L-14 8 M0 8 L16 8 M8 -8 L18 -8" stroke="var(--ink)" stroke-width="2.2" fill="none"/>
+  <circle cx="-14" cy="8" r="1.6" fill="var(--ink)"/><circle cx="16" cy="8" r="1.6" fill="var(--ink)"/>
+</g>
+<!-- telescope on a tripod -->
+<g transform="translate(770 476) rotate(-24)" filter="url(#rough)">
+  <rect x="-4" y="-16" width="26" height="10" rx="4" fill="var(--olive)" fill-opacity=".6" stroke="var(--ink)" stroke-width="2"/>
+  <path d="M22 -18 L34 -22 L34 -1 L22 -5 Z" fill="var(--ochre)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2"/>
+  <path d="M0 -6 L-8 16 M8 -6 L2 16 M-4 -4 L-4 16" stroke="var(--ink)" stroke-width="2" fill="none"/>
+</g>
+<!-- sailing boat on the river -->
+<g transform="translate(500 700)" filter="url(#rough)">
+  <path d="M-26 12 Q0 26 26 12 L20 22 Q0 30 -20 22 Z" fill="var(--rust)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2.4"/>
+  <line x1="0" y1="12" x2="0" y2="-30" stroke="var(--ink)" stroke-width="2.4"/>
+  <path d="M2 -28 L20 8 L2 8 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.2"/>
+  <path d="M-2 -20 L-18 8 L-2 8 Z" fill="var(--dust)" fill-opacity=".55" stroke="var(--ink)" stroke-width="2.2"/>
+</g>
+<!-- paper boat -->
+<g transform="translate(150 1120)" filter="url(#rough)">
+  <path d="M-22 6 L22 6 L14 20 L-14 20 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.2"/>
+  <path d="M-22 6 L0 6 L0 -14 Z" fill="var(--dust)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2.2"/>
+  <path d="M0 6 L22 6 L0 -10 Z" fill="none" stroke="var(--ink)" stroke-width="2.2"/>
+</g>
+<!-- bridges -->
+<g transform="translate(470 545)" filter="url(#rough)">
+  <path d="M-34 6 Q0 -20 34 6" fill="none" stroke="var(--ink)" stroke-width="2.6"/>
+  <path d="M-34 12 Q0 -14 34 12" fill="none" stroke="var(--ink)" stroke-width="2.2"/>
+  <path d="M-34 6 L-34 -6 M-14 -8 L-14 -18 M14 -8 L14 -18 M34 6 L34 -6" stroke="var(--ink)" stroke-width="2" fill="none"/>
+</g>
+<g transform="translate(500 1300)" filter="url(#rough)">
+  <path d="M-30 4 Q-14 -12 0 4 Q14 -12 30 4" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+  <path d="M-30 4 L30 4" stroke="var(--ink)" stroke-width="2.2"/>
+  <path d="M-30 4 L-30 12 M0 4 L0 12 M30 4 L30 12" stroke="var(--ink)" stroke-width="2"/>
+</g>
+<!-- compass rose -->
+<g transform="translate(858 150)" filter="url(#rough)">
+  <circle r="30" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  <circle r="24" fill="none" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="2 5"/>
+  <path d="M0 -28 L5 0 L0 28 L-5 0 Z" fill="var(--terra)" fill-opacity=".6" stroke="var(--ink)" stroke-width="1.6"/>
+  <path d="M-28 0 L0 5 L28 0 L0 -5 Z" fill="var(--dust)" fill-opacity=".5" stroke="var(--ink)" stroke-width="1.6"/>
+  <circle r="3" fill="var(--ink)"/>
+</g>
+<!-- moon + stars -->
+<g filter="url(#rough)"><path d="M902 78 A22 22 0 1 0 902 122 A17 17 0 1 1 902 78 Z" fill="var(--ochre)" fill-opacity=".55" stroke="var(--ink)" stroke-width="2"/></g>
+<use href="#star4" x="852" y="76"/><use href="#starink" x="880" y="150"/><use href="#star4" x="828" y="132"/><use href="#starink" x="922" y="176"/>
+<!-- swallows -->
+<g class="fly-a" transform="translate(620 120)"><use href="#swallow"/></g>
+<g class="fly-b" transform="translate(672 96) scale(.85)"><use href="#swallow"/></g>
+<g class="fly-a" transform="translate(712 138) scale(1.05)"><use href="#swallow"/></g>
+<g class="fly-b" transform="translate(760 108) scale(.8)"><use href="#swallow"/></g>
+<use href="#swallow" x="806" y="150" transform="scale(.7)" opacity=".8"/>
+<!-- old key -->
+<g transform="translate(70 770) rotate(12)" filter="url(#rough)">
+  <circle cx="0" cy="0" r="8" fill="none" stroke="var(--ink)" stroke-width="2.6"/>
+  <circle cx="0" cy="0" r="3" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+  <path d="M0 8 L0 40 M0 34 L8 34 M0 28 L6 28" stroke="var(--ink)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+</g>
+<!-- pen + feather -->
+<g transform="translate(842 1332) rotate(-38)" filter="url(#rough)">
+  <path d="M-4 -34 L4 -34 L2 -6 L0 2 L-2 -6 Z" fill="var(--navy)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2"/>
+  <line x1="0" y1="-24" x2="0" y2="-2" stroke="var(--ink)" stroke-width="1.4"/>
+  <rect x="-4" y="-34" width="8" height="-30" fill="var(--terra)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2"/>
+</g>
+<g transform="translate(792 1338) rotate(22)" filter="url(#rough)">
+  <path d="M0 24 Q-2 -6 8 -26 Q14 -6 6 18 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2"/>
+  <path d="M4 20 L4 -18 M4 8 L-4 12 M4 -2 L-2 2 M4 -12 L0 -8 M4 8 L12 4 M4 -2 L10 -6" stroke="var(--ink)" stroke-width="1" fill="none" opacity=".7"/>
+</g>
+<!-- dragonfly -->
+<g transform="translate(566 1250)" filter="url(#rough)">
+  <line x1="0" y1="-10" x2="0" y2="14" stroke="var(--ink)" stroke-width="2"/>
+  <path d="M0 -4 Q-18 -12 -22 -2 Q-14 -2 0 -2 Z" fill="var(--dust)" fill-opacity=".4" stroke="var(--ink)" stroke-width="1.4"/>
+  <path d="M0 -4 Q18 -12 22 -2 Q14 -2 0 -2 Z" fill="var(--dust)" fill-opacity=".4" stroke="var(--ink)" stroke-width="1.4"/>
+  <path d="M0 2 Q-14 -2 -18 6 Q-10 6 0 4 Z" fill="var(--teal)" fill-opacity=".35" stroke="var(--ink)" stroke-width="1.2"/>
+  <path d="M0 2 Q14 -2 18 6 Q10 6 0 4 Z" fill="var(--teal)" fill-opacity=".35" stroke="var(--ink)" stroke-width="1.2"/>
+  <circle cx="0" cy="-11" r="2.4" fill="var(--ink)"/>
+</g>
+<!-- bench + rabbit -->
+<g transform="translate(118 1250)" filter="url(#rough)">
+  <path d="M-22 10 L22 10 M-22 10 L-22 22 M22 10 L22 22 M-16 10 L-16 22 M16 10 L16 22" stroke="var(--ink)" stroke-width="2.2" fill="none"/>
+  <path d="M-22 10 L-22 0 M22 10 L22 0 M-22 4 L22 4 M-22 0 L22 0" stroke="var(--ink)" stroke-width="2" fill="none"/>
+</g>
+<g transform="translate(210 1298)" filter="url(#rough)">
+  <path d="M-6 8 Q-14 6 -12 -6 Q-14 -18 -8 -18 Q-4 -14 -6 -6 Q0 -12 6 -6 Q4 -14 8 -18 Q14 -18 12 -6 Q14 6 6 8 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2"/>
+  <circle cx="8" cy="8" r="2" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="1.4"/>
+  <circle cx="0" cy="-2" r="1.2" fill="var(--ink)"/>
+</g>
+
+<!-- ======================================================= -->
+<!-- ==========  CLICKABLE DISCOVERIES (open a page)  ======= -->
+<!-- ======================================================= -->
+
+<!-- WINDMILLS -->
+<g class="spot" data-key="windmills" tabindex="0" role="button" aria-label="Windmills — open the list of places">
+  <rect class="hit" x="60" y="182" width="120" height="180"/>
+  <circle class="halo" cx="120" cy="264" r="60" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(120 250)" filter="url(#rough)">
+    <path d="M-24 62 Q0 52 26 62" stroke="var(--olive)" stroke-width="3" fill="none" opacity=".6"/>
+    <path d="M-15 60 L-9 14 L9 14 L15 60 Z" fill="var(--terra)" fill-opacity=".55" stroke="var(--ink)" stroke-width="2.4"/>
+    <path d="M-9 14 Q0 4 9 14 Z" fill="var(--ink)" fill-opacity=".7" stroke="var(--ink)" stroke-width="2"/>
+    <circle cx="0" cy="14" r="2.4" fill="var(--ink)"/>
+    <g stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" fill="none">
+      <path d="M0 14 L-30 -14 M0 14 L30 42 M0 14 L-28 44 M0 14 L28 -16"/>
+      <path d="M-8 3 L-24 -18 M-16 8 L-32 -8" stroke-width="1.4"/>
+      <path d="M8 25 L24 46 M16 20 L32 36" stroke-width="1.4"/>
+    </g>
+  </g>
+  <text class="label" x="120" y="340" font-family="Caveat" font-size="30" font-weight="700" fill="var(--ink)" text-anchor="middle">Windmills</text>
+</g>
+
+<!-- AMSTERDAM -->
+<g class="spot" data-key="amsterdam" tabindex="0" role="button" aria-label="Amsterdam — open the list of places">
+  <rect class="hit" x="640" y="236" width="180" height="140"/>
+  <circle class="halo" cx="700" cy="288" r="58" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(700 258)" filter="url(#rough)">
+    <g stroke="var(--ink)" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M-40 60 L-40 6 Q-40 -6 -30 -10 Q-20 -6 -20 6 L-20 60 Z" fill="var(--terra)" fill-opacity=".5"/>
+      <path d="M-16 60 L-16 -2 L-14 -14 L-2 -14 L0 -2 L0 60 Z" fill="var(--dust)" fill-opacity=".5"/>
+      <path d="M4 60 L4 4 L10 -8 L22 -8 L28 4 L28 60 Z" fill="var(--ochre)" fill-opacity=".5"/>
+    </g>
+    <g fill="var(--navy)" fill-opacity=".55">
+      <rect x="-35" y="16" width="9" height="12"/><rect x="-35" y="36" width="9" height="12"/>
+      <rect x="-12" y="10" width="8" height="11"/><rect x="-12" y="30" width="8" height="11"/><rect x="-12" y="46" width="8" height="10"/>
+      <rect x="10" y="14" width="9" height="12"/><rect x="10" y="36" width="9" height="12"/>
+    </g>
+    <path d="M-46 60 L34 60" stroke="var(--ink)" stroke-width="2.4"/>
+  </g>
+  <text class="label" x="700" y="346" font-family="Caveat" font-size="32" font-weight="700" fill="var(--ink)" text-anchor="middle">Amsterdam</text>
+</g>
+
+<!-- LEIDEN -->
+<g class="spot" data-key="leiden" tabindex="0" role="button" aria-label="Leiden — open the list of places">
+  <rect class="hit" x="60" y="524" width="150" height="130"/>
+  <circle class="halo" cx="134" cy="580" r="58" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(134 560)" filter="url(#rough)">
+    <path d="M-38 40 L-38 4 L38 4 L38 40 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.4"/>
+    <path d="M-44 4 L0 -22 L44 4 Z" fill="var(--terra)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2.4" stroke-linejoin="round"/>
+    <g stroke="var(--ink)" stroke-width="2">
+      <line x1="-28" y1="8" x2="-28" y2="40"/><line x1="-14" y1="8" x2="-14" y2="40"/>
+      <line x1="0" y1="8" x2="0" y2="40"/><line x1="14" y1="8" x2="14" y2="40"/><line x1="28" y1="8" x2="28" y2="40"/>
+    </g>
+    <path d="M-4 -8 L0 -14 L4 -8 L4 4 L-4 4 Z" fill="var(--ochre)" fill-opacity=".7" stroke="var(--ink)" stroke-width="1.6"/>
+    <line x1="-44" y1="40" x2="44" y2="40" stroke="var(--ink)" stroke-width="2.6"/>
+  </g>
+  <text class="label" x="134" y="636" font-family="Caveat" font-size="32" font-weight="700" fill="var(--ink)" text-anchor="middle">Leiden</text>
+</g>
+
+<!-- BOERHAAVE (microscope + books) -->
+<g class="spot" data-key="boerhaave" tabindex="0" role="button" aria-label="Boerhaave and the sciences — open the list of places">
+  <rect class="hit" x="266" y="628" width="150" height="110"/>
+  <circle class="halo" cx="336" cy="668" r="52" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(300 668)" filter="url(#rough)">
+    <g stroke="var(--ink)" stroke-width="2.2">
+      <rect x="-22" y="14" width="44" height="10" fill="var(--navy)" fill-opacity=".5"/>
+      <rect x="-18" y="4" width="40" height="10" fill="var(--terra)" fill-opacity=".55"/>
+      <rect x="-14" y="-6" width="34" height="10" fill="var(--olive)" fill-opacity=".55"/>
+    </g>
+  </g>
+  <g transform="translate(372 660)" filter="url(#rough)">
+    <path d="M-10 30 L10 30 M0 30 L0 18 M0 18 L-8 4 M0 18 Q14 12 8 -6 L2 -10" fill="none" stroke="var(--ink)" stroke-width="2.2"/>
+    <circle cx="-1" cy="-13" r="4" fill="var(--dust)" fill-opacity=".6" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="-10" y1="30" x2="6" y2="30" stroke="var(--ink)" stroke-width="3"/>
+  </g>
+  <text class="label" x="336" y="722" font-family="Caveat" font-size="28" font-weight="700" fill="var(--ink)" text-anchor="middle">Boerhaave</text>
+</g>
+
+<!-- OBSERVATORY -->
+<g class="spot" data-key="observatory" tabindex="0" role="button" aria-label="Observatories — open the list of places">
+  <rect class="hit" x="808" y="392" width="94" height="130"/>
+  <circle class="halo" cx="852" cy="440" r="46" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(852 430)" filter="url(#rough)">
+    <path d="M-30 44 L-30 20 L30 20 L30 44 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.4"/>
+    <path d="M-30 20 A30 24 0 0 1 30 20 Z" fill="var(--dust)" fill-opacity=".55" stroke="var(--ink)" stroke-width="2.4"/>
+    <path d="M-4 -3 L6 20 M4 -3 L-6 20" stroke="var(--ink)" stroke-width="2" fill="var(--paper)"/>
+    <line x1="-30" y1="44" x2="30" y2="44" stroke="var(--ink)" stroke-width="2.4"/>
+  </g>
+  <text class="label" x="852" y="490" font-family="Caveat" font-size="26" font-weight="700" fill="var(--ink)" text-anchor="middle">Observatory</text>
+</g>
+
+<!-- LIGHTHOUSE -->
+<g class="spot" data-key="lighthouse" tabindex="0" role="button" aria-label="Coast and lighthouses — open the list of places">
+  <rect class="hit" x="850" y="486" width="70" height="160"/>
+  <circle class="halo" cx="882" cy="558" r="52" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(882 560)" filter="url(#rough)">
+    <path d="M-12 60 L-8 4 L8 4 L12 60 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.4"/>
+    <path d="M-10 46 L10 46 M-11 30 L11 30 M-9 16 L9 16" stroke="var(--terra)" stroke-width="4" opacity=".65"/>
+    <path d="M-9 4 L9 4 L7 -6 L-7 -6 Z" fill="var(--navy)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2.2"/>
+    <rect x="-4" y="-14" width="8" height="9" fill="var(--ochre)" fill-opacity=".8" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M-3 -10 L-20 -18 M3 -10 L20 -18" stroke="var(--ochre)" stroke-width="1.6" opacity=".7"/>
+  </g>
+  <text class="label" x="882" y="640" font-family="Caveat" font-size="26" font-weight="700" fill="var(--ink)" text-anchor="middle">Lighthouse</text>
+</g>
+
+<!-- MONUMENT (new) -->
+<g class="spot" data-key="monument" tabindex="0" role="button" aria-label="Monuments and UNESCO sites — open the list of places">
+  <rect class="hit" x="578" y="418" width="84" height="140"/>
+  <circle class="halo" cx="620" cy="472" r="50" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(620 470)" filter="url(#rough)">
+    <!-- stepped plinth -->
+    <path d="M-24 44 L24 44 L24 36 L-24 36 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.2"/>
+    <path d="M-17 36 L17 36 L17 28 L-17 28 Z" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.2"/>
+    <!-- tapering obelisk -->
+    <path d="M-7 28 L-4 -30 L4 -30 L7 28 Z" fill="var(--dust)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2.4"/>
+    <!-- pyramidion -->
+    <path d="M-4 -30 L0 -42 L4 -30 Z" fill="var(--ochre)" fill-opacity=".7" stroke="var(--ink)" stroke-width="2"/>
+    <!-- wreath band -->
+    <path d="M-6 4 Q0 10 6 4" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+    <circle cx="0" cy="-3" r="2" fill="var(--terra)" fill-opacity=".8"/>
+  </g>
+  <text class="label" x="620" y="540" font-family="Caveat" font-size="26" font-weight="700" fill="var(--ink)" text-anchor="middle">Monument</text>
+</g>
+
+<!-- HUYGENS (clock + Saturn) -->
+<g class="spot" data-key="huygens" tabindex="0" role="button" aria-label="Huygens — open the list of places">
+  <rect class="hit" x="806" y="790" width="90" height="185"/>
+  <circle class="halo" cx="846" cy="880" r="58" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(846 806) rotate(-16)" filter="url(#rough)">
+    <circle r="9" fill="var(--ochre)" fill-opacity=".6" stroke="var(--ink)" stroke-width="2"/>
+    <ellipse rx="17" ry="5" fill="none" stroke="var(--ink)" stroke-width="2"/>
+  </g>
+  <g transform="translate(846 880)" filter="url(#rough)">
+    <rect x="-16" y="-6" width="32" height="70" rx="4" fill="var(--olive)" fill-opacity=".45" stroke="var(--ink)" stroke-width="2.4"/>
+    <circle cx="0" cy="12" r="10" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M0 12 L0 6 M0 12 L5 12" stroke="var(--ink)" stroke-width="1.6"/>
+    <path d="M0 22 L0 50" stroke="var(--ink)" stroke-width="1.6"/>
+    <circle cx="0" cy="52" r="4" fill="var(--ochre)" fill-opacity=".7" stroke="var(--ink)" stroke-width="1.6"/>
+  </g>
+  <text class="label" x="846" y="964" font-family="Caveat" font-size="28" font-weight="700" fill="var(--ink)" text-anchor="middle">Huygens</text>
+</g>
+
+<!-- SPINOZA -->
+<g class="spot" data-key="spinoza" tabindex="0" role="button" aria-label="Spinoza — open the list of places">
+  <rect class="hit" x="682" y="984" width="80" height="90"/>
+  <circle class="halo" cx="720" cy="1010" r="40" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(720 1010)" filter="url(#rough)">
+    <circle cx="-13" cy="0" r="12" fill="var(--dust)" fill-opacity=".4" stroke="var(--ink)" stroke-width="2.4"/>
+    <circle cx="13" cy="0" r="12" fill="var(--dust)" fill-opacity=".4" stroke="var(--ink)" stroke-width="2.4"/>
+    <path d="M-1 -2 Q0 -6 1 -2" stroke="var(--ink)" stroke-width="2" fill="none"/>
+    <path d="M-25 -2 L-33 -8 M25 -2 L33 -8" stroke="var(--ink)" stroke-width="2"/>
+  </g>
+  <text class="label" x="720" y="1052" font-family="Caveat" font-size="28" font-weight="700" fill="var(--ink)" text-anchor="middle">Spinoza</text>
+</g>
+
+<!-- DELFT -->
+<g class="spot" data-key="delft" tabindex="0" role="button" aria-label="Delft — open the list of places">
+  <rect class="hit" x="106" y="984" width="94" height="130"/>
+  <circle class="halo" cx="150" cy="1030" r="46" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(150 1020)" filter="url(#rough)">
+    <path d="M-16 40 L-16 -2 L-4 -14 L8 -2 L8 40 Z" fill="var(--dust)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2.4"/>
+    <rect x="-11" y="6" width="7" height="9" fill="var(--navy)" fill-opacity=".5"/>
+    <rect x="-11" y="22" width="7" height="9" fill="var(--navy)" fill-opacity=".5"/>
+    <path d="M8 40 L28 40 L28 8 L18 8 L18 40" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2.2"/>
+    <line x1="-20" y1="40" x2="30" y2="40" stroke="var(--ink)" stroke-width="2.4"/>
+  </g>
+  <text class="label" x="150" y="1090" font-family="Caveat" font-size="28" font-weight="700" fill="var(--ink)" text-anchor="middle">Delft</text>
+</g>
+
+<!-- DESCARTES -->
+<g class="spot" data-key="descartes" tabindex="0" role="button" aria-label="Descartes — open the list of places">
+  <rect class="hit" x="258" y="1150" width="100" height="110"/>
+  <circle class="halo" cx="308" cy="1188" r="46" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(300 1180)" filter="url(#rough)">
+    <rect x="-4" y="-6" width="8" height="26" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M0 -6 Q4 -16 0 -22 Q-4 -16 0 -6 Z" fill="var(--ochre)" fill-opacity=".8" stroke="var(--ink)" stroke-width="1.4"/>
+    <path d="M28 -18 L20 12 M28 -18 L36 12" stroke="var(--ink)" stroke-width="2.2" fill="none"/>
+    <circle cx="28" cy="-18" r="2.2" fill="var(--ink)"/>
+    <path d="M20 12 L36 12" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="1 4"/>
+  </g>
+  <text class="label" x="308" y="1244" font-family="Caveat" font-size="27" font-weight="700" fill="var(--ink)" text-anchor="middle">Descartes</text>
+</g>
+
+<!-- HOGE VELUWE -->
+<g class="spot" data-key="hogeveluwe" tabindex="0" role="button" aria-label="Hoge Veluwe and nature reserves — open the list of places">
+  <rect class="hit" x="640" y="1140" width="130" height="140"/>
+  <circle class="halo" cx="700" cy="1195" r="60" fill="none" stroke="var(--terra)" stroke-width="1.6" stroke-dasharray="3 6"/>
+  <g transform="translate(700 1180)">
+    <use href="#pine" transform="translate(-30 -6) scale(.9)"/>
+    <use href="#pine" transform="translate(24 2) scale(1.1)"/>
+    <g transform="translate(0 26)" filter="url(#rough)">
+      <path d="M-14 6 Q-16 -8 -8 -10 L-12 -18 L-4 -12 Q2 -14 8 -12 L4 -20 L10 -12 Q18 -8 16 6 Z" fill="var(--rust)" fill-opacity=".6" stroke="var(--ink)" stroke-width="2"/>
+      <path d="M16 4 Q28 2 30 -8" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="-6" cy="-4" r="1.4" fill="var(--ink)"/><circle cx="2" cy="-4" r="1.4" fill="var(--ink)"/>
+    </g>
+  </g>
+  <text class="label" x="700" y="1264" font-family="Caveat" font-size="27" font-weight="700" fill="var(--ink)" text-anchor="middle">Hoge Veluwe</text>
+</g>
+
+<!-- THE DOOR (heart) -->
+<g class="spot" data-key="door" tabindex="0" role="button" aria-label="The open door — a place you haven't found yet">
+  <rect class="hit" x="428" y="874" width="130" height="210"/>
+  <g transform="translate(470 942)">
+    <circle class="doorglow" r="86" fill="url(#doorGlow)"/>
+    <use href="#star4" x="-58" y="-70" opacity=".9"/><use href="#starink" x="46" y="-78"/>
+    <use href="#star4" x="70" y="-30"/><use href="#starink" x="-70" y="-14"/>
+    <g filter="url(#rough)">
+      <rect x="-34" y="-64" width="68" height="94" rx="6" fill="var(--paper-hi)" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M-28 -58 L18 -58 L18 24 L-28 30 Z" fill="url(#doorSky)"/>
+      <use href="#star4" x="-14" y="-40" transform="scale(.7)"/>
+      <use href="#star4" x="6" y="-26" transform="scale(.6)"/>
+      <circle cx="8" cy="-46" r="5" fill="#f2e6bf" opacity=".85"/>
+      <path d="M18 -58 L40 -50 L40 34 L18 24 Z" fill="var(--terra)" fill-opacity=".55" stroke="var(--ink)" stroke-width="2.6"/>
+      <circle cx="24" cy="-14" r="2.2" fill="var(--ink)"/>
+      <rect x="-34" y="-64" width="68" height="94" rx="6" fill="none" stroke="var(--ink)" stroke-width="3"/>
+      <g stroke="var(--ink)" stroke-width="2.6" fill="none" stroke-linecap="round">
+        <path d="M-18 30 L-30 132 M4 30 L2 132"/>
+        <path d="M-20 52 L2 51 M-22 74 L1 73 M-24 96 L0 95 M-27 118 L0 117"/>
+      </g>
+    </g>
+    <text class="label" x="58" y="-40" font-family="Caveat" font-size="28" font-weight="700" fill="var(--ink)">curiosity</text>
+  </g>
+</g>
+
+<!-- ================= TITLE ================= -->
+<g>
+  <text x="60" y="118" font-family="Caveat" font-size="78" font-weight="700" fill="var(--ink)">The Netherlands</text>
+  <text x="66" y="164" font-family="Caveat" font-size="40" fill="var(--ink-soft)">a map of quiet discoveries</text>
+  <path d="M66 176 C 190 168, 320 172, 396 176" stroke="var(--terra)" stroke-width="2" fill="none" opacity=".5" filter="url(#rough)"/>
+  <text x="66" y="204" font-family="Reenie" font-size="22" fill="var(--ink-soft)" opacity=".8">tap any drawing to open its page of places</text>
+</g>
+
+<!-- ================= MOOD LINE ================= -->
+<g>
+  <path d="M150 1338 H850" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="1 7" opacity=".4"/>
+  <text x="500" y="1372" font-family="Caveat" font-size="34" fill="var(--ink)" text-anchor="middle">There is no need to rush —</text>
+  <text x="500" y="1402" font-family="Caveat" font-size="28" fill="var(--ink)" opacity=".82" text-anchor="middle">discovery happens one quiet place at a time.</text>
+</g>
+
+<!-- ================= DECORATIVE FRAME ================= -->
+<rect x="34" y="34" width="932" height="1372" rx="6" fill="none"
+      stroke="var(--ink-soft)" stroke-width="1.4" stroke-dasharray="7 7" opacity=".35" filter="url(#rough)"/>
+<use href="#hole" x="28" y="330"/><use href="#hole" x="28" y="720"/><use href="#hole" x="28" y="1110"/>
+<g opacity=".4">
+  <rect x="-6" y="24" width="70" height="26" transform="rotate(-24 30 37)" fill="var(--ochre)" fill-opacity=".5"/>
+  <rect x="946" y="1382" width="70" height="26" transform="rotate(-18 980 1395)" fill="var(--dust)" fill-opacity=".5"/>
+</g>
+<g fill="var(--ink)" opacity=".5">
+  <circle cx="640" cy="640" r="1.6"/><circle cx="648" cy="648" r="1"/><circle cx="632" cy="652" r="1.2"/>
+  <circle cx="356" cy="900" r="1.6"/><circle cx="364" cy="906" r="1"/><circle cx="349" cy="910" r="1.1"/>
+  <circle cx="200" cy="440" r="1.4"/><circle cx="208" cy="446" r="1"/>
+</g>
+<use href="#starink" x="150" y="720"/><use href="#star4" x="915" y="700"/>
+<use href="#starink" x="360" y="1120"/>
+
+<!-- grain + vignette -->
+<rect x="14" y="14" width="972" height="1412" rx="10" filter="url(#grain)" opacity=".05"/>
+<rect x="14" y="14" width="972" height="1412" rx="10" fill="none" stroke="var(--vignette)" stroke-width="60" opacity=".5" filter="url(#soft)"/>
+</svg>
+</div>
+<p class="credit">an illustrated journal spread · drawn slowly, in the manner of a traveller's notebook</p>
+
+<!-- ================= THE PAGE BEHIND EACH ICON ================= -->
+<div class="backdrop" id="backdrop" role="presentation">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <button class="close" id="sheetClose" aria-label="Close this page">×</button>
+    <div class="sheet-eyebrow" id="sheetEyebrow">a page for</div>
+    <h2 class="sheet-title" id="sheetTitle">—</h2>
+    <p class="sheet-tag" id="sheetTag"></p>
+    <div class="sheet-heading">places to visit</div>
+    <div class="cardwall" id="sheetList"></div>
+    <div class="addrow">
+      <input id="addInput" class="addinput" type="text" autocomplete="off"
+             placeholder="add a place you'll visit…" aria-label="Add a place you will visit">
+      <button id="addBtn" class="addbtn" type="button">＋ add card</button>
+    </div>
+    <div class="sheet-foot">tick the ones you've seen · add your own places as cards</div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  windmills:{title:"Windmills",tag:"turning slowly against a wide, flat sky",places:[
+    {n:"Kinderdijk",s:"nineteen mills in a row · UNESCO",loc:"Nederwaard 1, Kinderdijk",q:"Kinderdijk Windmills"},
+    {n:"Zaanse Schans",s:"green wooden mills by the Zaan",loc:"Schansend 7, Zaandam",q:"Zaanse Schans"},
+    {n:"De Gooyer, Amsterdam",s:"the city's last tall mill",loc:"Funenkade 5, Amsterdam",q:"De Gooyer windmill, Amsterdam"},
+    {n:"Schiedam",s:"the tallest windmills in the world",loc:"Schiedam mill district",q:"Windmills of Schiedam"}]},
+  amsterdam:{title:"Amsterdam",tag:"canals, low light on the water, small rooms full of paintings",places:[
+    {n:"Rijksmuseum",s:"Vermeer & the Dutch Golden Age",loc:"Museumstraat 1, Amsterdam",q:"Rijksmuseum, Amsterdam"},
+    {n:"The Grachtengordel",s:"the ring of canals · UNESCO",loc:"Amsterdam canal ring",q:"Grachtengordel, Amsterdam"},
+    {n:"Rembrandt House",s:"his studio, kept as it was",loc:"Jodenbreestraat 4, Amsterdam",q:"Museum Het Rembrandthuis, Amsterdam"},
+    {n:"Ons' Lieve Heer op Solder",s:"a church hidden in an attic",loc:"Oudezijds Voorburgwal 38, Amsterdam",q:"Ons' Lieve Heer op Solder, Amsterdam"}]},
+  leiden:{title:"Leiden",tag:"the city of first books and long, unhurried thoughts",places:[
+    {n:"Universiteit Leiden",s:"the oldest university in the country",loc:"Rapenburg 73, Leiden",q:"Academiegebouw Universiteit Leiden"},
+    {n:"Hortus Botanicus",s:"a botanical garden since 1590",loc:"Rapenburg 73, Leiden",q:"Hortus Botanicus Leiden"},
+    {n:"Rijksmuseum Boerhaave",s:"five centuries of science",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden"},
+    {n:"Rapenburg & the Pieterskerk",s:"quiet canal, older stones",loc:"Pieterskerkhof 1a, Leiden",q:"Pieterskerk, Leiden"}]},
+  boerhaave:{title:"Boerhaave & the Sciences",tag:"how to look closely, and keep looking",places:[
+    {n:"Rijksmuseum Boerhaave, Leiden",s:"instruments, cabinets, curiosity",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden"},
+    {n:"The Anatomical Theatre",s:"where looking became learning",loc:"Rapenburg, Leiden",q:"Anatomisch Theater Leiden"},
+    {n:"Teylers Museum, Haarlem",s:"the oldest museum in the country",loc:"Spaarne 16, Haarlem",q:"Teylers Museum, Haarlem"},
+    {n:"Leeuwenhoek's Delft",s:"the first glimpse of the very small",loc:"Markt 80, Delft (Oude Kerk)",q:"Van Leeuwenhoek Oude Kerk Delft"}]},
+  observatory:{title:"Observatories",tag:"rooms built to hold the night still for a while",places:[
+    {n:"Old Observatory, Leiden",s:"the Sterrewacht of 1861",loc:"Sterrenwachtlaan 11, Leiden",q:"Old Observatory Leiden"},
+    {n:"Sonnenborgh, Utrecht",s:"a bastion turned to the stars",loc:"Zonnenburg 2, Utrecht",q:"Sonnenborgh museum sterrenwacht Utrecht"},
+    {n:"Radboud, Nijmegen",s:"darker nights to the east",loc:"Nijmegen",q:"Radboud Universiteit Nijmegen"}]},
+  lighthouse:{title:"Coast & Lighthouses",tag:"small lights kept for anyone still out on the water",places:[
+    {n:"Brandaris, Terschelling",s:"the oldest lighthouse in the land",loc:"Torenstraat, West-Terschelling",q:"Brandaris lighthouse Terschelling"},
+    {n:"The Wadden Sea",s:"tidal flats · UNESCO",loc:"Waddenzee coast",q:"Waddenzee"},
+    {n:"Westhoofd, Ouddorp",s:"tallest light on the coast",loc:"Westhoofd, Ouddorp",q:"Vuurtoren Westhoofd Ouddorp"},
+    {n:"'Lange Jaap', Den Helder",s:"the tallest cast-iron light",loc:"Kijkduin, Den Helder",q:"Lange Jaap lighthouse Den Helder"}]},
+  monument:{title:"Monuments & UNESCO",tag:"the marks a country leaves to remember itself by",places:[
+    {n:"Spinoza Monument",s:"Nicolas Dings, 2008 — 'the purpose of the state is freedom'",loc:"Zwanenburgwal 15, 1011 VW Amsterdam · by the Stopera",q:"Spinoza Monument, Zwanenburgwal, Amsterdam"},
+    {n:"Nationaal Monument, Dam Square",s:"Amsterdam's place of remembering",loc:"Dam, Amsterdam",q:"Nationaal Monument Dam, Amsterdam"},
+    {n:"The Beemster Polder",s:"land drawn from water · UNESCO",loc:"De Beemster, North Holland",q:"Beemster Polder"},
+    {n:"Van Nelle Factory, Rotterdam",s:"daylight & modern lines · UNESCO",loc:"Van Nelleweg 1, Rotterdam",q:"Van Nelle Fabriek, Rotterdam"},
+    {n:"The Afsluitdijk",s:"holding back the sea",loc:"Afsluitdijk, Friesland–North Holland",q:"Afsluitdijk"}]},
+  huygens:{title:"Huygens",tag:"the measure of time, and the rings around Saturn",places:[
+    {n:"Huygens' Hofwijck, Voorburg",s:"his garden house on the Vliet",loc:"Westeinde 2A, Voorburg",q:"Museum Huygens Hofwijck, Voorburg"},
+    {n:"His pendulum clock",s:"at Rijksmuseum Boerhaave, Leiden",loc:"Lange Sint Agnietenstraat 10, Leiden",q:"Rijksmuseum Boerhaave, Leiden"},
+    {n:"The Hague",s:"where he was born and thought",loc:"Den Haag",q:"The Hague, Netherlands"}]},
+  spinoza:{title:"Spinoza",tag:"grind the lens patiently, and see the whole",places:[
+    {n:"Spinozahuis, Rijnsburg",s:"where he ground lenses & wrote",loc:"Spinozalaan 29, Rijnsburg",q:"Spinozahuis, Rijnsburg"},
+    {n:"Paviljoensgracht, The Hague",s:"his last rooms",loc:"Paviljoensgracht 72-74, Den Haag",q:"Domus Spinozana Paviljoensgracht Den Haag"},
+    {n:"Nieuwe Kerk, The Hague",s:"his quiet memorial",loc:"Spui 175, Den Haag",q:"Nieuwe Kerk Den Haag"}]},
+  delft:{title:"Delft",tag:"blue tiles, still canals, Vermeer's patient rooms",places:[
+    {n:"Vermeer Centrum",s:"the light he is remembered for",loc:"Voldersgracht 21, Delft",q:"Vermeer Centrum Delft"},
+    {n:"Oude & Nieuwe Kerk",s:"leaning tower, royal tombs",loc:"Markt 80, Delft",q:"Nieuwe Kerk Delft"},
+    {n:"Royal Delft",s:"the last delftware pottery",loc:"Rotterdamseweg 196, Delft",q:"Royal Delft De Porceleyne Fles"},
+    {n:"Museum Prinsenhof",s:"where the country's story turned",loc:"Sint Agathaplein 1, Delft",q:"Museum Prinsenhof Delft"}]},
+  descartes:{title:"Descartes",tag:"a candle, a clear thought — I think, therefore I am",places:[
+    {n:"His Amsterdam lodgings",s:"years of quiet writing",loc:"Westermarkt 6, Amsterdam",q:"Westermarkt, Amsterdam"},
+    {n:"Endegeest, Oegstgeest",s:"the castle where he stayed",loc:"Endegeesterstraatweg 5, Oegstgeest",q:"Kasteel Endegeest, Oegstgeest"},
+    {n:"Franeker",s:"the town of his studies",loc:"Franeker, Friesland",q:"Franeker"}]},
+  hogeveluwe:{title:"Hoge Veluwe",tag:"a reserve of silence — heath, pine, and white bicycles",places:[
+    {n:"Kröller-Müller Museum",s:"Van Goghs among the trees",loc:"Houtkampweg 6, Otterlo",q:"Kröller-Müller Museum"},
+    {n:"Jachthuis Sint Hubertus",s:"a hunting lodge on the water",loc:"De Hoge Veluwe, Otterlo",q:"Jachthuis Sint Hubertus"},
+    {n:"The white bicycles",s:"free to ride through the park",loc:"Nationaal Park De Hoge Veluwe",q:"Nationaal Park De Hoge Veluwe"},
+    {n:"Heath & drifting sand",s:"go at dusk for the deer",loc:"De Hoge Veluwe, Hoenderloo",q:"Nationaal Park De Hoge Veluwe Hoenderloo"}]},
+  door:{title:"A place not yet found",tag:"leave this page open — for the discovery still ahead of you",places:[
+    {n:"A village with no name yet",s:"the one you'll stumble into"},
+    {n:"A library you'll sit in for hours",s:"somewhere you haven't been"},
+    {n:"A path off the marked road",s:"follow it and see"}]}
+};
+
+const backdrop = document.getElementById('backdrop');
+const elTitle = document.getElementById('sheetTitle');
+const elTag = document.getElementById('sheetTag');
+const elList = document.getElementById('sheetList');
+const addInput = document.getElementById('addInput');
+const addBtn = document.getElementById('addBtn');
+let lastFocus = null;
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function routeHref(q){
+  return 'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent('Utrecht Centraal')
+    +'&destination='+encodeURIComponent(q)+'&travelmode=transit';
+}
+function makeCard(p){
+  const card = document.createElement('div');
+  card.className = 'card' + (p.user ? ' card-user' : '');
+  const btn = document.createElement('button');
+  btn.className='tick'; btn.type='button'; btn.setAttribute('aria-pressed','false');
+  btn.setAttribute('aria-label','mark '+p.n+' as visited');
+  btn.addEventListener('click',()=>{
+    const on = btn.getAttribute('aria-pressed')==='true';
+    btn.setAttribute('aria-pressed', on?'false':'true');
+    card.classList.toggle('done', !on);
+  });
+  const body = document.createElement('div'); body.className='body';
+  let html = '<div class="cname">'+esc(p.n)+'</div>';
+  if(p.s)   html += '<div class="cnote">'+esc(p.s)+'</div>';
+  if(p.loc) html += '<span class="loc">'+esc(p.loc)+'</span>';
+  if(p.q)   html += '<a class="maproute" href="'+routeHref(p.q)+'" target="_blank" rel="noopener">Route from Utrecht Centraal ↗</a>';
+  body.innerHTML = html;
+  card.append(btn, body);
+  return card;
+}
+function buildList(key){
+  elList.innerHTML='';
+  DATA[key].places.forEach(p=> elList.append(makeCard(p)) );
+}
+function addPlace(){
+  const v = addInput.value.trim();
+  if(!v) return;
+  const card = makeCard({ n:v, s:"a place you want to visit", q:v+', Netherlands', user:true });
+  elList.append(card);
+  addInput.value=''; addInput.focus();
+  card.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+function openSheet(key){
+  if(!DATA[key]) return;
+  lastFocus = document.activeElement;
+  elTitle.textContent = DATA[key].title;
+  elTag.textContent = DATA[key].tag;
+  buildList(key);
+  addInput.value='';
+  backdrop.classList.add('show');
+  document.getElementById('sheetClose').focus();
+}
+addBtn.addEventListener('click', addPlace);
+addInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addPlace(); } });
+function closeSheet(){
+  backdrop.classList.remove('show');
+  if(lastFocus && lastFocus.focus) lastFocus.focus();
+}
+document.querySelectorAll('.spot').forEach(el=>{
+  el.addEventListener('click',()=>openSheet(el.dataset.key));
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openSheet(el.dataset.key); }
+  });
+});
+document.getElementById('sheetClose').addEventListener('click',closeSheet);
+backdrop.addEventListener('click',e=>{ if(e.target===backdrop) closeSheet(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && backdrop.classList.contains('show')) closeSheet(); });
+</script>
